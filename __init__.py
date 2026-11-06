@@ -1,12 +1,13 @@
 import json
 from .core import Governor
 from .transcode import transcode
-from .gpu import gpu_status
+from .gpu import gpu_status, gpu_process
 
 TOOLS = {
     'resource_watch_start': ('Begin watching a same-user Linux process against explicit RSS and average CPU budgets; monitoring only, no enforcement.', {'pid': {'type': 'integer', 'minimum': 1}, 'max_rss_mb': {'type': 'number', 'exclusiveMinimum': 0}, 'max_cpu_percent': {'type': 'number', 'exclusiveMinimum': 0}}, ['pid', 'max_rss_mb', 'max_cpu_percent']),
     'resource_transcode_video': ('Run one plugin-owned CPU-only local video conversion with explicit Linux address-space, CPU-time and wall-time limits; output is separate.', {'source_path': {'type': 'string'}, 'max_seconds': {'type': 'integer', 'minimum': 1, 'maximum': 60}, 'address_space_mb': {'type': 'integer', 'minimum': 512, 'maximum': 16384}, 'cpu_seconds': {'type': 'integer', 'minimum': 1, 'maximum': 60}, 'wall_seconds': {'type': 'integer', 'minimum': 1, 'maximum': 60}, 'allow_profile_media': {'type': 'boolean', 'description': 'Explicitly allow a selected media file under the active profile plugin-data directory.'}}, ['source_path', 'max_seconds', 'address_space_mb', 'cpu_seconds', 'wall_seconds']),
     'resource_watch_check': ('Measure the same process identity since watch start and report budget exceedances; never kills, pauses or throttles processes.', {'watch_id': {'type': 'string'}}, ['watch_id']),
+    'resource_gpu_process': ('Read NVIDIA compute-process memory entries for one selected same-user PID; absent or unavailable entries do not mean zero, and graphics usage may be omitted.', {'pid': {'type': 'integer', 'minimum': 1}}, ['pid']),
     'resource_gpu_status': ('Read current device-wide NVIDIA GPU memory usage with nvidia-smi; no model loading, GPU reservation or enforcement.', {}, []),
 }
 
@@ -15,6 +16,7 @@ def invoke(name, args):
     try:
         root = plugin_data_dir('resource-governor')
         if name == 'resource_gpu_status': return json.dumps(gpu_status())
+        if name == 'resource_gpu_process': return json.dumps(gpu_process(**args))
         if name == 'resource_transcode_video': return json.dumps(transcode(root, **args), allow_nan=False)
         return json.dumps(getattr(Governor(root), name.removeprefix('resource_watch_'))(**args), allow_nan=False)
     except (ValueError, TypeError, OSError, KeyError, RuntimeError) as exc:
