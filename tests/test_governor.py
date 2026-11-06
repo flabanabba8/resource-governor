@@ -10,6 +10,14 @@ core = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(core)
 
 class GovernorTests(unittest.TestCase):
+    def test_new_watch_record_is_private_under_permissive_umask(self):
+        with tempfile.TemporaryDirectory(dir='/tmp') as tmp:
+            previous = os.umask(0)
+            try:
+                watch = core.Governor(tmp).start(os.getpid(), 100, 100)
+                self.assertEqual((Path(tmp)/(watch['watch_id']+'.json')).stat().st_mode & 0o777, 0o600)
+            finally:
+                os.umask(previous)
     def test_watch_current_process(self):
         with tempfile.TemporaryDirectory(dir='/tmp') as tmp:
             governor = core.Governor(tmp)

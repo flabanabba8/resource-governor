@@ -1,6 +1,8 @@
 # Resource Governor
 
 Watch a selected same-user Linux process against explicit resident-memory and average CPU budgets. The plugin records process and boot identities to avoid confusing a reused PID with the original, and rechecks process identity while collecting a sample. Monitoring reports exceedances without pausing, terminating or altering that process.
+New watch records use owner-only POSIX permissions; existing records are not
+retroactively changed. Watch records contain local process and boot identifiers.
 
 An explicit read-only `resource_gpu_status` call reports NVIDIA device-wide memory usage via `nvidia-smi` without loading a model or reserving GPU memory. This point-in-time value can change immediately, does not attribute usage to individual processes, and does not enforce or reserve a budget. A separate explicit `resource_gpu_process` query checks NVIDIA compute-process entries for one same-user PID, with a process identity check. Graphics processes may be omitted, unavailable values are null, and an absent entry is not evidence of zero GPU usage. Systems without a working NVIDIA utility return an explicit error.
 

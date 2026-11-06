@@ -43,7 +43,8 @@ class Governor:
         boot_id = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
         watch_id = uuid.uuid4().hex
         state = {'pid': pid, 'initial': initial, 'boot_id': boot_id, 'max_rss_mb': max_rss_mb, 'max_cpu_percent': max_cpu_percent}
-        with (self.root / (watch_id + '.json')).open('x') as f: json.dump(state, f)
+        with os.fdopen(os.open(self.root / (watch_id + '.json'), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), 'w') as f:
+            json.dump(state, f)
         return {'watch_id': watch_id, 'pid': pid, 'rss_mb': initial['rss_kib'] / 1024}
 
     def check(self, watch_id):
