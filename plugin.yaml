@@ -8,3 +8,4 @@ provides_tools:
   - resource_watch_start
   - resource_watch_check
   - resource_transcode_video
+  - resource_gpu_status
