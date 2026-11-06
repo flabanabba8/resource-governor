@@ -1,0 +1,10 @@
+name: resource-governor
+version: "0.1.0"
+description: "Monitor a selected same-user Linux process against explicit resource budgets."
+author: "Resource Governor contributors"
+license: GPL-3.0-or-later
+requires_hermes: ">=0.22.0"
+provides_tools:
+  - resource_watch_start
+  - resource_watch_check
+  - resource_transcode_video
