@@ -2,6 +2,7 @@
 import json
 import math
 import os
+import sys
 from pathlib import Path
 import time
 import uuid
@@ -18,6 +19,7 @@ def stat_fields(text):
 
 
 def measure(pid):
+    if sys.platform != 'linux': raise ValueError('Process monitoring requires Linux /proc')
     if type(pid) is not int or pid < 1: raise ValueError('Invalid PID')
     proc = Path('/proc') / str(pid)
     if proc.stat().st_uid != os.getuid(): raise ValueError('Process belongs to another user')
@@ -48,6 +50,7 @@ class Governor:
         return {'watch_id': watch_id, 'pid': pid, 'rss_mb': initial['rss_kib'] / 1024}
 
     def check(self, watch_id):
+        if sys.platform != 'linux': raise ValueError('Process monitoring requires Linux /proc')
         if not isinstance(watch_id, str) or len(watch_id) != 32 or any(x not in '0123456789abcdef' for x in watch_id): raise ValueError('Invalid watch ID')
         path = self.root / (watch_id + '.json')
         if path.is_symlink(): raise ValueError('Invalid watch path')

@@ -26,6 +26,11 @@ class TranscodeTests(unittest.TestCase):
                        env={'PATH':os.defpath,'LANG':'C.UTF-8'})
     def tearDown(self): self.tmp.cleanup()
 
+    def test_unsupported_platform_reports_linux_requirement(self):
+        with patch.object(core.sys,'platform','win32'):
+            with self.assertRaisesRegex(ValueError,'requires Linux'):
+                core.transcode(self.root/'out',str(self.source),1,2048,10,20)
+
     def test_real_cpu_job_and_credential_scrubbing(self):
         before = self.source.read_bytes()
         seen_env, observed_limits = [], []

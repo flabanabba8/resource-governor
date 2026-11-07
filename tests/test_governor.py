@@ -10,6 +10,10 @@ core = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(core)
 
 class GovernorTests(unittest.TestCase):
+    def test_unsupported_platform_reports_linux_requirement(self):
+        with patch.object(core.sys, 'platform', 'win32'):
+            with self.assertRaisesRegex(ValueError,'requires Linux'):core.measure(1)
+
     def test_new_watch_record_is_private_under_permissive_umask(self):
         with tempfile.TemporaryDirectory(dir='/tmp') as tmp:
             previous = os.umask(0)

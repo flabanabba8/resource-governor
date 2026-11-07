@@ -1,5 +1,8 @@
 """One plugin-owned CPU video conversion with Linux resource limits."""
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 import hashlib
 import json
 import time
@@ -8,6 +11,7 @@ from pathlib import Path
 import shutil
 import signal
 import subprocess
+import sys
 import uuid
 
 PRIVATE = {'.ssh', '.gnupg', '.aws', '.azure', '.codex', '.docker', '.kube', '.pki', '.config', '.hermes'}
@@ -23,6 +27,7 @@ def sha(path):
 
 
 def transcode(root, source_path, max_seconds, address_space_mb, cpu_seconds, wall_seconds, allow_profile_media=False):
+    if sys.platform != 'linux' or fcntl is None: raise ValueError('Governed video conversion requires Linux prlimit and POSIX locking')
     values = (max_seconds, address_space_mb, cpu_seconds, wall_seconds)
     if any(type(x) is not int for x in values) or not 1 <= max_seconds <= 60 or not 512 <= address_space_mb <= 16384 or not 1 <= cpu_seconds <= 60 or not 1 <= wall_seconds <= 60:
         raise ValueError('Use duration 1–60 s, address space 512–16384 MiB, and CPU/wall budgets 1–60 s')
