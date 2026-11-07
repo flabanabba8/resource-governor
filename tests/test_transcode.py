@@ -66,7 +66,7 @@ class TranscodeTests(unittest.TestCase):
         self.assertEqual(list((self.root/'output').glob('*.mp4')), [])
 
     def test_explicit_active_profile_media_access(self):
-        private = self.root/'.hermes'
+        private = self.root/'.HeRmEs'
         sibling = private/'plugin-data'/'tutorial'
         sibling.mkdir(parents=True)
         video = sibling/'demo.mp4'

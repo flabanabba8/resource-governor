@@ -29,14 +29,14 @@ def transcode(root, source_path, max_seconds, address_space_mb, cpu_seconds, wal
     if type(allow_profile_media) is not bool: raise ValueError('allow_profile_media must be boolean')
     source = Path(source_path).expanduser()
     original_parts = source.parts
-    if not source.is_absolute() or source.is_symlink() or any(x in PRIVATE - {'.hermes'} for x in original_parts):
+    if not source.is_absolute() or source.is_symlink() or any(x.casefold() in PRIVATE - {'.hermes'} for x in original_parts):
         raise ValueError('Choose an absolute non-symlink video outside private configuration')
     source = source.resolve(strict=True)
     profile_data = Path(root).resolve().parent
-    profile_home = profile_data.parent if profile_data.name == 'plugin-data' else None
+    profile_home = profile_data.parent if profile_data.name.casefold() == 'plugin-data' else None
     permitted_private_media = allow_profile_media and profile_home is not None and source.is_relative_to(profile_data)
-    protected = '.hermes' in original_parts or '.hermes' in source.parts or (profile_home is not None and source.is_relative_to(profile_home))
-    if (any(x in PRIVATE - {'.hermes'} for x in source.parts) or protected and not permitted_private_media or
+    protected = any(x.casefold() == '.hermes' for x in original_parts) or any(x.casefold() == '.hermes' for x in source.parts) or (profile_home is not None and source.is_relative_to(profile_home))
+    if (any(x.casefold() in PRIVATE - {'.hermes'} for x in source.parts) or protected and not permitted_private_media or
         not source.is_file() or source.suffix.lower() not in ('.mp4', '.mkv', '.mov', '.webm')):
         raise ValueError('Choose a local video outside private configuration or explicitly allow active-profile plugin media')
     if source.stat().st_size > MAX_SOURCE: raise ValueError('Source exceeds 256 MiB')
